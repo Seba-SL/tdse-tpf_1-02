@@ -1,0 +1,3 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">&#x0A;<refactoring comment="Rename resource &apos;tdse-tpFinal&apos; to &apos;tdse-tpFinal_v0&apos;" description="Rename resource &apos;tdse-tpFinal&apos;" flags="7" id="org.eclipse.ltk.core.refactoring.rename.resource" input="/tdse-tpFinal" name="tdse-tpFinal_v0" stamp="1751577296469" updateReferences="true"/>&#x0A;<refactoring comment="Delete 4 resources" deleteContents="false" description="Delete 4 resources" element1="/tdse-tpFinal/tdse-tpFinal.cfg" element2="/tdse-tpFinal/tdse-tpFinal.launch" element3="/tdse-tpFinal/tdse-tpFinal Debug.cfg" element4="/tdse-tpFinal/tdse-tpFinal Debug.launch" flags="7" id="org.eclipse.ltk.core.refactoring.delete.resources" resources="4" stamp="1751577365187"/>
+</session>

@@ -1,0 +1,3 @@
+../app/src/task_pwm.c:73:6:task_pwm_init	32	static,ignoring_inline_asm
+../app/src/task_pwm.c:85:6:task_pwm_update	168	static
+../app/src/task_pwm.c:148:6:setPWM	40	static

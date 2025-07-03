@@ -1,0 +1,5 @@
+../app/src/MPU6050.c:21:19:MPU6050_Init	9
+../app/src/MPU6050.c:93:6:MPU6050_HandleInterrupt	1
+../app/src/MPU6050.c:101:6:MPU6050_Process	4
+../app/src/MPU6050.c:143:6:MPU6050_UpdateOrientation	2
+../app/src/MPU6050.c:168:16:MPU6050_GetData	1

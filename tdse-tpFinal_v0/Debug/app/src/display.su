@@ -1,0 +1,7 @@
+../app/src/display.c:114:6:displayInit	16	static
+../app/src/display.c:189:6:displayCharPositionWrite	16	static
+../app/src/display.c:226:6:displayStringWrite	16	static
+../app/src/display.c:234:13:displayCodeWrite	16	static
+../app/src/display.c:244:13:displayPinWrite	16	static
+../app/src/display.c:281:13:displayDataBusWrite	16	static
+../app/src/display.c:323:6:display_delay_us	24	static
