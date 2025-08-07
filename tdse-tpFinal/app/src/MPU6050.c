@@ -12,7 +12,7 @@
 
 static I2C_HandleTypeDef *mpu_i2c = NULL;
 static MPU6050_Data_t mpu_data;
-static volatile uint8_t data_ready = 0;
+uint8_t MPU_ready=0;
 
 static float alpha = 0.9f; // filtro complementario
 static uint8_t inicializado = 0;
@@ -30,6 +30,7 @@ HAL_StatusTypeDef MPU6050_Init(I2C_HandleTypeDef *hi2c, uint8_t int_polarity)
         printf("WHO_AM_I = 0x%02X\n", who_am_i);
     } else {
         printf("Error leyendo WHO_AM_I\n");
+        return ret;
     }
 
     // 1) Setear reloj a PLL con gyro X
@@ -41,6 +42,23 @@ HAL_StatusTypeDef MPU6050_Init(I2C_HandleTypeDef *hi2c, uint8_t int_polarity)
     }
 
     HAL_Delay(100);
+
+    // 2) Configurar DLPF (registro CONFIG, 0x1A)
+    data = 0x03;  // DLPF_CFG = 3 -> ancho de banda ~44Hz
+    ret = HAL_I2C_Mem_Write(mpu_i2c, MPU6050_ADDR, 0x1A, 1, &data, 1, HAL_MAX_DELAY);
+    if (ret != HAL_OK) {
+        printf("Error escribiendo CONFIG\n");
+        return ret;
+    }
+
+    // 3) Configurar SMPLRT_DIV (registro 0x19)
+    data = 0x13;  // SMPLRT_DIV = 19 -> sample rate = gyro output rate / (1 + 19)
+    ret = HAL_I2C_Mem_Write(mpu_i2c, MPU6050_ADDR, 0x19, 1, &data, 1, HAL_MAX_DELAY);
+    if (ret != HAL_OK) {
+        printf("Error escribiendo SMPLRT_DIV\n");
+        return ret;
+    }
+
 
     // 2) Configurar acelerometro a ±2g
     data = 0x00;
@@ -85,13 +103,15 @@ HAL_StatusTypeDef MPU6050_Init(I2C_HandleTypeDef *hi2c, uint8_t int_polarity)
         printf("Error escribiendo INT_ENABLE\n");
         return ret;
     }
-
+    HAL_Delay(100);
+    MPU_ready=1;
     return HAL_OK;
 }
 
 
 void MPU6050_HandleInterrupt(void) {
-    data_ready = 1;
+	if (1!=MPU_ready) return;
+	MPU6050_Process();
 }
 
 #include <time.h>  // o usa un timer hardware para medir dt
@@ -99,12 +119,11 @@ void MPU6050_HandleInterrupt(void) {
 static uint32_t last_tick = 0;
 
 void MPU6050_Process(void) {
-    if (!data_ready) return;
-    data_ready = 0;
 
     uint8_t buf[14];
-    if (HAL_I2C_Mem_Read(mpu_i2c, MPU6050_ADDR, DATA_START_REG, 1, buf, 14, HAL_MAX_DELAY) != HAL_OK) {
+    if (HAL_I2C_Mem_Read(mpu_i2c, MPU6050_ADDR, DATA_START_REG, 1, buf, 14, 100) != HAL_OK) {
         printf("Error leyendo datos del MPU6050\n");
+        HAL_Delay(10);
         return;
     }
 
@@ -142,8 +161,8 @@ void MPU6050_Process(void) {
 
 void MPU6050_UpdateOrientation(float dt) {
     // Ángulos por acelerómetro (en grados)
-    float roll_acc  = atan2f(mpu_data.accel_gy, mpu_data.accel_gz) * 180.0f / M_PI;
-    float pitch_acc = atan2f(-mpu_data.accel_gx, sqrtf(mpu_data.accel_gy * mpu_data.accel_gy + mpu_data.accel_gz * mpu_data.accel_gz)) * 180.0f / M_PI;
+    float roll_acc  = atan2f(mpu_data.accel_gy, -mpu_data.accel_gz) * 180.0f / M_PI;
+    float pitch_acc = atan2f(mpu_data.accel_gx, sqrtf(mpu_data.accel_gy * mpu_data.accel_gy + mpu_data.accel_gz * mpu_data.accel_gz)) * 180.0f / M_PI;
 
     // Primera lectura: inicializar ángulos con acelerómetro para evitar "saltos"
     if (!inicializado) {
@@ -153,7 +172,7 @@ void MPU6050_UpdateOrientation(float dt) {
     }
 
     // Integrar giroscopio (velocidad angular en grados/seg)
-    mpu_data.roll  += mpu_data.gyro_dps_x * dt;
+    mpu_data.roll  -= mpu_data.gyro_dps_x * dt;
     mpu_data.pitch += mpu_data.gyro_dps_y * dt;
 
     // Aplicar filtro complementario

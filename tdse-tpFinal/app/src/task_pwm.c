@@ -48,6 +48,7 @@
 #include "board.h"
 #include "app.h"
 #include "MPU6050.h"
+#include <math.h>
 
 /********************** macros and definitions *******************************/
 
@@ -90,41 +91,44 @@ void task_pwm_update(void *parameters)
 
 	shared_data_type *shared_data = (shared_data_type *) parameters;
 
-	if( shared_data->pwm1_enabled ){
+	if( shared_data->pwm1_enabled || shared_data->pwm2_enabled || shared_data->pwm3_enabled || shared_data->pwm4_enabled ){
 		MPU6050_Data_t data=MPU6050_GetData();
-		shared_data->pwm1_active = period*(data.pitch)/99;
-		setPWM(htim2, TIM_CHANNEL_1, period, shared_data->pwm1_active);
-	}
-	else{
-		setPWM(htim2, TIM_CHANNEL_1, period, 0);
+
+		if(90>data.pitch && data.pitch>0 && -90<data.roll && data.roll<0){
+			shared_data->pwm1_active = period*(sqrtf(data.pitch*data.pitch+data.roll*data.roll))/128;
+			setPWM(htim2, TIM_CHANNEL_1, period, shared_data->pwm1_active);
+		}
+		else{
+			setPWM(htim2, TIM_CHANNEL_1, period, 0);
+		}
+
+		if(90>data.pitch && data.pitch>0 && 90>data.roll && data.roll>0){
+			shared_data->pwm2_active = period*(sqrtf(data.pitch*data.pitch+data.roll*data.roll))/128;
+			setPWM(htim2, TIM_CHANNEL_2, period, shared_data->pwm2_active);
+		}
+		else{
+			setPWM(htim2, TIM_CHANNEL_2, period, 0);
+		}
+
+		if( -90<data.pitch && data.pitch<0 && -90<data.roll && data.roll<0){
+			shared_data->pwm3_active = period*(sqrtf(data.pitch*data.pitch+data.roll*data.roll))/128;
+			setPWM(htim2, TIM_CHANNEL_3, period, shared_data->pwm3_active);
+		}
+		else{
+			setPWM(htim2, TIM_CHANNEL_3, period, 0);
+		}
+
+		if( -90<data.pitch && data.pitch<0 && 90>data.roll && data.roll>0 ){
+			shared_data->pwm4_active = period*(sqrtf(data.pitch*data.pitch+data.roll*data.roll))/128;
+			setPWM(htim2, TIM_CHANNEL_4, period, shared_data->pwm4_active);
+		}
+		else{
+			setPWM(htim2, TIM_CHANNEL_4, period, 0);
+		}
+
+
 	}
 
-	if( shared_data->pwm2_enabled ){
-		MPU6050_Data_t data=MPU6050_GetData();
-		shared_data->pwm2_active = period*(data.roll)/99;
-		setPWM(htim2, TIM_CHANNEL_2, period, shared_data->pwm2_active);
-	}
-	else{
-		setPWM(htim2, TIM_CHANNEL_2, period, 0);
-	}
-
-	if( shared_data->pwm3_enabled ){
-		MPU6050_Data_t data=MPU6050_GetData();
-		shared_data->pwm3_active = period*(-data.pitch)/99;
-		setPWM(htim2, TIM_CHANNEL_3, period, shared_data->pwm3_active);
-	}
-	else{
-		setPWM(htim2, TIM_CHANNEL_3, period, 0);
-	}
-
-	if( shared_data->pwm4_enabled ){
-		MPU6050_Data_t data=MPU6050_GetData();
-		shared_data->pwm4_active = period*(-data.roll)/99;
-		setPWM(htim2, TIM_CHANNEL_4, period, shared_data->pwm4_active);
-	}
-	else{
-		setPWM(htim2, TIM_CHANNEL_4, period, 0);
-	}
 	/*
 	if ( shared_data->adc_end_of_conversion ) {
 		shared_data->adc_end_of_conversion = false;

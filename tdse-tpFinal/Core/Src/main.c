@@ -1,16 +1,20 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-TPF Curso 1 , Grupo 02
+  * @file           : main.c
+  * @brief          : Main program body
   ******************************************************************************
-  Monitoreo de Drone
-
-  ultmima actualización 3/07/2025
+  * @attention
+  *
+  * Copyright (c) 2025 STMicroelectronics.
+  * All rights reserved.
+  *
+  * This software is licensed under terms that can be found in the LICENSE file
+  * in the root directory of this software component.
+  * If no LICENSE file comes with this software, it is provided AS-IS.
+  *
   ******************************************************************************
   */
-
-
-
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -19,6 +23,7 @@ TPF Curso 1 , Grupo 02
 /* USER CODE BEGIN Includes */
 #include "MPU6050.h"
 #include "Interrupts.h"
+#include "display.h"
 
 /* Demo includes. */
 #include "logger.h"
@@ -109,12 +114,18 @@ int main(void)
   /* USER CODE BEGIN 2 */
 
 	/* Application Init */
-  app_init();
   while(MPU6050_Init(&hi2c1, 0) != HAL_OK){
-		printf("Error al inicializar MPU6050\n");
+		displayInit( DISPLAY_CONNECTION_GPIO_4BITS );
+		displayCharPositionWrite(0, 0);
+		displayStringWrite("Error MPU6050");
 		HAL_Delay(500);
   }
-  printf("MPU6050 inicializado correctamente\n");
+
+displayInit( DISPLAY_CONNECTION_GPIO_4BITS );
+displayCharPositionWrite(0, 0);
+displayStringWrite("MPU6050 OK");
+  app_init();
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -124,7 +135,7 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-	  MPU6050_Process();
+	  //MPU6050_Process();
 
 	  /* Application Update */
 	  app_update();
@@ -340,7 +351,7 @@ static void MX_GPIO_Init(void)
   /*Configure GPIO pins : D12_Pin D11_Pin */
   GPIO_InitStruct.Pin = D12_Pin|D11_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /*Configure GPIO pin : INT_MPU6050_Pin */
@@ -384,7 +395,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(D4_GPIO_Port, &GPIO_InitStruct);
 
   /* EXTI interrupt init*/
-  HAL_NVIC_SetPriority(EXTI0_IRQn, 3, 0);
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);

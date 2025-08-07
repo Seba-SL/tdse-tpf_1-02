@@ -2,6 +2,7 @@
 #define MPU6050_H
 
 #include "stm32f1xx_hal.h"
+extern uint8_t MPU_ready;
 
 typedef struct {
     int16_t accel_x, accel_y, accel_z;

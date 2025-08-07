@@ -43,6 +43,7 @@
 /* Demo includes. */
 #include "logger.h"
 #include "dwt.h"
+#include <stdio.h>
 
 /* Application & Tasks includes. */
 #include "board.h"
@@ -183,19 +184,19 @@ void task_menu_update(void *parameters)
 			switch (p_task_menu_dta->state)
 			{
 				case ST_MEN_XX_IDLE:
-
 					displayInit( DISPLAY_CONNECTION_GPIO_4BITS );
-					displayCharPositionWrite(0, 0);
-			        displayStringWrite("En base");
 
-			        if ((true == p_task_menu_dta->flag) && (EV_MEN_ENT_ACTIVE == p_task_menu_dta->event))
+					displayCharPositionWrite(0, 0);
+					displayStringWrite("IDLE");
+
+					if ((true == p_task_menu_dta->flag) && (EV_MEN_ENT_ACTIVE == p_task_menu_dta->event))
 					{
 						p_task_menu_dta->flag = false;
 						p_task_menu_dta->state = ST_MEN_XX_MENU;
-						displayInit( DISPLAY_CONNECTION_GPIO_4BITS );
 
+						displayInit( DISPLAY_CONNECTION_GPIO_4BITS );
 						displayCharPositionWrite(0, 0);
-						displayStringWrite("MENU DE VUELO");
+						displayStringWrite("FLIGHT MENU");
 					}
 
 					break;
@@ -377,6 +378,7 @@ void task_menu_update(void *parameters)
 					snprintf(buffer, sizeof(buffer), "P:%5.1f R:%5.1f", data.pitch, data.roll);
 					displayCharPositionWrite(0, 1);
 					displayStringWrite(buffer);
+					//printf("Roll: %.2f°, Pitch: %.2f°\n", data.roll, data.pitch);
 
 					if ((true == p_task_menu_dta->flag) && (EV_MEN_ENT_ACTIVE == p_task_menu_dta->event))
 					{
