@@ -1,4 +1,0 @@
-  display.c (display.h)
-   Non-Blocking Code -> Display Code Library
-
-...
